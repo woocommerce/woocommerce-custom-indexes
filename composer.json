@@ -1,0 +1,31 @@
+{
+  "name": "woocommerce/woocommerce-custom-indexes",
+  "description": "Adds custom indexes to WordPress and WooCommerce tables to speed up queries.",
+  "homepage": "https://github.com/woocommerce/woocommerce-custom-indexes",
+  "type": "wordpress-plugin",
+  "license": "GPL-3.0-or-later",
+  "prefer-stable": true,
+  "minimum-stability": "dev",
+  "require-dev": {
+    "squizlabs/php_codesniffer": "3.2.3",
+    "wp-coding-standards/wpcs": "0.14.1",
+    "woocommerce/woocommerce-git-hooks": "1.0.5",
+    "woocommerce/woocommerce-sniffs": "0.0.2",
+    "wimg/php-compatibility": "8.1.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "v0.4.4"
+  },
+  "scripts": {
+    "pre-update-cmd": [
+      "WooCommerce\\GitHooks\\Hooks::preHooks"
+    ],
+    "pre-install-cmd": [
+      "WooCommerce\\GitHooks\\Hooks::preHooks"
+    ],
+    "post-install-cmd": [
+      "WooCommerce\\GitHooks\\Hooks::postHooks"
+    ],
+    "post-update-cmd": [
+      "WooCommerce\\GitHooks\\Hooks::postHooks"
+    ]
+  }
+}
