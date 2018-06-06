@@ -30,10 +30,20 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// Include the main class.
-if ( ! class_exists( 'WC_Custom_Indexes' ) ) {
-	include_once dirname( __FILE__ ) . '/includes/class-wc-custom-indexes.php';
+if ( ! defined( 'WC_CUSTOM_INDEXES_PLUGIN_FILE' ) ) {
+	define( 'WC_CUSTOM_INDEXES_PLUGIN_FILE', __FILE__ );
 }
 
-add_action( 'plugins_loaded', array( 'WC_Product_Type_Column', 'init' ) );
-register_activation_hook( __FILE__, array( 'WC_Product_Type_Column', 'activation_check' ) );
+if ( ! defined( 'WC_CUSTOM_INDEXES_PLUGIN_BASENAME' ) ) {
+	define( 'WC_CUSTOM_INDEXES_PLUGIN_BASENAME', plugin_basename( WC_CUSTOM_INDEXES_PLUGIN_FILE ) );
+}
+
+// Include the main class.
+if ( ! class_exists( 'WC_Custom_Indexes' ) ) {
+	require dirname( __FILE__ ) . '/includes/class-wc-custom-indexes.php';
+}
+
+$wc_custom_indexes = new WC_Custom_Indexes();
+
+add_action( 'plugins_loaded', array( $wc_custom_indexes, 'init' ) );
+register_activation_hook( __FILE__, array( $wc_custom_indexes, 'activation_check' ) );
