@@ -19,6 +19,7 @@ class WC_Custom_Indexes_Admin {
 	 */
 	public function init() {
 		add_filter( 'plugin_action_links_' . WC_CUSTOM_INDEXES_PLUGIN_BASENAME, array( $this, 'plugin_action_links' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
 		add_action( 'admin_menu', array( $this, 'add_menu_entry' ), 99 );
 		add_action( 'admin_init', array( $this, 'maybe_add_indexes' ) );
 	}
@@ -35,6 +36,29 @@ class WC_Custom_Indexes_Admin {
 		);
 
 		return array_merge( $action_links, $links );
+	}
+
+	/**
+	 * Enqueue plugin admin scripts.
+	 *
+	 * @return void
+	 */
+	public function enqueue_admin_scripts() {
+		wp_register_script(
+			'wc-custom-indexes-admin',
+			plugins_url( 'assets/js/wc-custom-indexes-admin.js', WC_CUSTOM_INDEXES_PLUGIN_FILE ),
+			array( 'jquery' )
+		);
+
+		wp_enqueue_script( 'wc-custom-indexes-admin' );
+
+		wp_localize_script(
+			'wc-custom-indexes-admin',
+			'wcCustomIndexesVars',
+			array(
+				'confirmAction' => __( 'It is strongly recommended that you backup your database before proceeding. Your site will be in maintenance mode while the queries are running. Are you sure you wish to proceed?', 'woocommerce-custom-indexes' ),
+			)
+		);
 	}
 
 	/**

@@ -17,13 +17,13 @@ $action_url = wp_nonce_url(
 	<p>
 		<?php
 		esc_html_e(
-			'Click the button bellow to add custom indexes to your WooCommerce/WordPress tables. This process will put your site in maintenance mode while the queries are running. It might take several minutes for this operation to complete depending on your database size.',
+			'Click the button bellow to add custom indexes to your WooCommerce/WordPress tables. This process will put your site in maintenance mode while the queries are running. It might take several minutes for this operation to complete depending on your database size. It is highly recommended that you perform a backup of the site before proceeding.',
 			'woocommerce-custom-indexes'
 		);
 		?>
 	</p>
 	<p class="submit">
-		<a href="<?php echo esc_url( $action_url ); ?>" class="button-primary">
+		<a href="<?php echo esc_url( $action_url ); ?>" class="button-primary wc-add-custom-indexes">
 			<?php esc_html_e( 'Add custom indexes', 'woocommerce-custom-indexes' ); ?>
 		</a>
 	</p>
