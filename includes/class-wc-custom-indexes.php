@@ -21,10 +21,11 @@ class WC_Custom_Indexes {
 		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
 
 		if ( class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.0', '>=' ) && is_admin() ) {
-			require_once dirname( __FILE__ ) . '/class-wc-custom-indexes-runner.php';
+			require_once dirname( __FILE__ ) . '/class-wc-custom-indexes-manager.php';
 			require_once dirname( __FILE__ ) . '/class-wc-custom-indexes-admin.php';
 
-			$admin = new WC_Custom_Indexes_Admin();
+			$manager = new WC_Custom_Indexes_Manager();
+			$admin = new WC_Custom_Indexes_Admin( $manager );
 			$admin->init();
 		}
 	}

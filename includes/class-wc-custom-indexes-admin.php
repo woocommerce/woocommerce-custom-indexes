@@ -13,6 +13,22 @@ defined( 'ABSPATH' ) || exit;
 class WC_Custom_Indexes_Admin {
 
 	/**
+	 * WC_Custom_Indexes_Manager instance.
+	 *
+	 * @var WC_Custom_Indexes_Manager
+	 */
+	protected $manager;
+
+	/**
+	 * WC_Custom_Indexes_Admin constructor.
+	 *
+	 * @param WC_Custom_Indexes_Manager $manager WC_Custom_Indexes_Manager instance.
+	 */
+	public function __construct( WC_Custom_Indexes_Manager $manager ) {
+		$this->manager = $manager;
+	}
+
+	/**
 	 * Add initialization actions and filters.
 	 *
 	 * @return void
@@ -21,7 +37,7 @@ class WC_Custom_Indexes_Admin {
 		add_filter( 'plugin_action_links_' . WC_CUSTOM_INDEXES_PLUGIN_BASENAME, array( $this, 'plugin_action_links' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
 		add_action( 'admin_menu', array( $this, 'add_menu_entry' ), 99 );
-		add_action( 'admin_init', array( $this, 'maybe_add_indexes' ) );
+		add_action( 'admin_init', array( $this, 'maybe_change_indexes' ) );
 	}
 
 	/**
@@ -87,16 +103,22 @@ class WC_Custom_Indexes_Admin {
 	}
 
 	/**
-	 * Maybe start the process that will add custom indexes to the database tables.
+	 * Maybe start the process that will add or remove custom indexes from the database tables.
 	 *
 	 * @return void
 	 */
-	public function maybe_add_indexes() {
-		if ( isset( $_GET['page'] ) && 'wc-custom-indexes' === $_GET['page'] && ! empty( $_GET['wc-add-custom-indexes'] ) ) {
-			check_admin_referer( 'wc-add-custom-indexes' );
+	public function maybe_change_indexes() {
+		if ( isset( $_GET['page'] ) && 'wc-custom-indexes' === $_GET['page'] && ( ! empty( $_GET['wc-add-custom-indexes'] ) || ! empty( $_GET['wc-remove-custom-indexes'] ) ) ) {
+			if ( ! empty( $_GET['wc-add-custom-indexes'] ) ) {
+				check_admin_referer( 'wc-add-custom-indexes' );
+				$this->manager->add_indexes();
+			} elseif ( ! empty( $_GET['wc-remove-custom-indexes'] ) ) {
+				check_admin_referer( 'wc-remove-custom-indexes' );
+				$this->manager->remove_indexes();
+			}
 
-			$runner = new WC_Custom_Indexes_Runner();
-			$runner->add_indexes();
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-custom-indexes' ) );
+			exit;
 		}
 	}
 }
