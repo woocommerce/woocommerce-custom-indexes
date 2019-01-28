@@ -20,13 +20,22 @@ class WC_Custom_Indexes {
 	public function init() {
 		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
 
-		if ( class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.0', '>=' ) && is_admin() ) {
-			require_once dirname( __FILE__ ) . '/class-wc-custom-indexes-manager.php';
+		if ( ! class_exists( 'WooCommerce' ) || version_compare( WC_VERSION, '3.0', '<' ) ) {
+			return;
+		}
+
+		require_once dirname( __FILE__ ) . '/class-wc-custom-indexes-manager.php';
+
+		if ( is_admin() ) {
 			require_once dirname( __FILE__ ) . '/class-wc-custom-indexes-admin.php';
 
 			$manager = new WC_Custom_Indexes_Manager();
 			$admin = new WC_Custom_Indexes_Admin( $manager );
 			$admin->init();
+		}
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			include_once dirname( __FILE__ ) . '/class-wc-custom-indexes-cli.php';
 		}
 	}
 
