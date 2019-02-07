@@ -21,10 +21,10 @@ class WC_Custom_Indexes_CLI extends WP_CLI_Command {
 	 */
 	public function add() {
 		WP_CLI::line( 'Creating indexes...' );
-        $manager = new WC_Custom_Indexes_Manager();
-        $manager->add_indexes();
-        WP_CLI::line( 'Done.' );
-    }
+		$manager = new WC_Custom_Indexes_Manager();
+		$manager->add_indexes();
+		WP_CLI::line( 'Done.' );
+	}
 
 	/**
 	 * Remove indexes.
@@ -33,9 +33,19 @@ class WC_Custom_Indexes_CLI extends WP_CLI_Command {
 	 */
 	public function remove() {
 		WP_CLI::line( 'Removing indexes...' );
-        $manager = new WC_Custom_Indexes_Manager();
-        $manager->remove_indexes();
-        WP_CLI::line( 'Done.' );
+		$manager = new WC_Custom_Indexes_Manager();
+		$manager->remove_indexes();
+		WP_CLI::line( 'Done.' );
+	}
+
+	/**
+	 * Recreate indexes.
+	 *
+	 * @subcommand recreate
+	 */
+	public function recreate() {
+		$this->remove();
+		$this->add();
 	}
 }
 
