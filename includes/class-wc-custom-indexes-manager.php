@@ -22,47 +22,93 @@ class WC_Custom_Indexes_Manager {
 	}
 
 	/**
-	 * Add custom indexes to the database tables.
+	 * Get indexes.
 	 *
-	 * @return void
+	 * Returns an array of indexes to add/drop.
+	 *
+	 * @return array
+	 */
+	protected function get_indexes() {
+		global $wpdb;
+
+		return array(
+			'wc_options_autoload'      => (object) array(
+				'table'   => $wpdb->options, // phpcs:ignore
+				'columns' => 'autoload, option_name',
+			),
+			'wc_postmeta_id_key_value' => (object) array(
+				'table'   => $wpdb->postmeta, // phpcs:ignore
+				'columns' => 'meta_key(191), post_id, meta_value(50)',
+			),
+			'wc_termmeta_id_key_value' => (object) array(
+				'table'   => $wpdb->termmeta, // phpcs:ignore
+				'columns' => 'meta_key(191), term_id, meta_value(50)',
+			),
+			'wc_usermeta_id_meta_key'  => (object) array(
+				'table'   => $wpdb->usermeta, // phpcs:ignore
+				'columns' => 'meta_key(191), user_id, meta_value(50)',
+			),
+			'wc_posts_id_status_type'  => (object) array(
+				'table'   => $wpdb->posts, // phpcs:ignore
+				'columns' => 'post_type, post_status, ID',
+			),
+		);
+	}
+
+	/**
+	 * Add custom indexes to the database tables.
 	 */
 	public function add_indexes() {
 		global $wpdb;
 
+		$indexes        = $this->get_indexes();
+		$create_indexes = array();
+
+		foreach ( $indexes as $name => $index ) {
+			if ( ! $this->index_exist( $index->table, $name ) ) {
+				$create_indexes[ $name ] = $index;
+			}
+		}
+
 		// Do nothing if index already exist.
-		if ( $this->index_exist( $wpdb->postmeta, 'wc_meta_key_value' ) ) {
+		if ( empty( $create_indexes ) ) {
 			return;
 		}
 
 		$this->maintenance_mode_on();
 
-		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.NoCaching
-		$wpdb->query(
-			"ALTER TABLE {$wpdb->postmeta} ADD INDEX wc_meta_key_value (meta_key(191), meta_value(100))" // phpcs:ignore WordPress.VIP.DirectDatabaseQuery.SchemaChange
-		);
+		foreach ( $create_indexes as $name => $index ) {
+			$wpdb->query( "CREATE INDEX {$name} ON {$index->table}({$index->columns});" ); // phpcs:ignore
+		}
 
 		$this->maintenance_mode_off();
 	}
 
 	/**
 	 * Add custom indexes to the database tables.
-	 *
-	 * @return void
 	 */
 	public function remove_indexes() {
 		global $wpdb;
 
-		// Do nothing if index doesn't exist .
-		if ( ! $this->index_exist( $wpdb->postmeta, 'wc_meta_key_value' ) ) {
+		$indexes        = $this->get_indexes();
+		$remove_indexes = array();
+
+		foreach ( $indexes as $name => $index ) {
+			if ( $this->index_exist( $index->table, $name ) ) {
+				$remove_indexes[ $name ] = $index;
+			}
+		}
+
+		// Do nothing if index does not exist.
+		if ( empty( $remove_indexes ) ) {
 			return;
 		}
 
 		$this->maintenance_mode_on();
 
-		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.NoCaching
-		$wpdb->query(
-			"ALTER TABLE {$wpdb->postmeta} DROP INDEX wc_meta_key_value" // phpcs:ignore WordPress.VIP.DirectDatabaseQuery.SchemaChange
-		);
+		foreach ( $remove_indexes as $name => $index ) {
+			$wpdb->query( "ALTER TABLE {$index->table} DROP INDEX {$name};" ); // phpcs:ignore
+		}
 
 		$this->maintenance_mode_off();
 	}
@@ -108,8 +154,7 @@ class WC_Custom_Indexes_Manager {
 	public function index_exist( $table_name, $index_name ) {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.NoCaching, WordPress.WP.PreparedSQL.NotPrepared
-		$indexes = $wpdb->get_var( "SHOW INDEXES FROM {$table_name} WHERE Key_name = '{$index_name}'" );
+		$indexes = $wpdb->get_var( "SHOW INDEXES FROM {$table_name} WHERE Key_name = '{$index_name}'" ); // phpcs:ignore
 
 		return is_null( $indexes ) ? false : true;
 	}
